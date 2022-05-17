@@ -1,0 +1,5 @@
+ls -laR end
+less ./main.c end
+mkdir ./tmpDir end
+cp ./main.c ./tmpDir end
+echo "Ciao" end
