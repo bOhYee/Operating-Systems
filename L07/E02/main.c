@@ -1,12 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <pthread.h>
 #include <errno.h>
 #define CHAR_SIZE 50+1
 
 typedef enum{
-    EXEC, N, STRA, STRB
+    EXEC, N, IN, OUT
 } params;
 
 typedef struct{
@@ -45,8 +44,8 @@ int main(int argc, char **argv){
     }
 
     // Creating the name of the input and output files
-    associateNameFile(inFileName, totFile, argv[STRA]);
-    associateNameFile(outFileName, totFile, argv[STRB]);
+    associateNameFile(inFileName, totFile, argv[IN]);
+    associateNameFile(outFileName, totFile, argv[OUT]);
 
     // Defining the threads
     for(int i = 0; i < totFile; i++){
