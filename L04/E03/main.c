@@ -6,7 +6,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #define STR_SIZE 256
-#define MAX_ARGS_EXEC 5
+#define MAX_ARGS_EXEC 5+1
 #define MAX_COMMANDS 20
 
 const char endCommand[10] = "end";
@@ -55,7 +55,7 @@ int main (int argc, char **argv) {
         return -1;
     }
     mode = convertStrToInt(argv[VERSION]);
-    if(mode == -1 || (mode < 1 && mode > 2)){
+    if(mode == -1){
         printf("Error while processing the mode parameter!\n");
         exit(1);
     }
@@ -86,11 +86,17 @@ void initCommands(Command **cmd_struct){
 void freeCommands(Command *cmd_struct){
 
     for(int i = 0; i < MAX_COMMANDS; i++){
-        free(cmd_struct[i].c);
+        if(cmd_struct[i].c != NULL)
+            free(cmd_struct[i].c);
+
         for(int l = 0; l < MAX_ARGS_EXEC; l++)
-            free(cmd_struct[i].params[l]);
+            if(cmd_struct[i].params[l] != NULL)
+                free(cmd_struct[i].params[l]);
+
+        free(cmd_struct[i].params);
     }
 
+    free(cmd_struct);
 }
 
 int readFile(int file, Command *cmd_str){
@@ -121,6 +127,8 @@ int readFile(int file, Command *cmd_str){
                 if(new_cmd == 1) {
                     cmd_read++;
                     strcpy(cmd_str[cmd_curr].c, word);
+                    cmd_str[cmd_curr].num_params++;
+                    strcpy(cmd_str[cmd_curr].params[arg_curr++], word);
                     new_cmd = 0;
                 }
                 else {
@@ -152,6 +160,9 @@ int convertStrToInt(char *str){
     if(str == endptr || (value == 0 && errno != 0) || value < 0)
         return -1;
 
+    if(value < 1 || value > 2)
+        return -1;
+
     return value;
 }
 
@@ -180,7 +191,8 @@ int sysCommand(Command *cmd_struct, int id){
     char command[STR_SIZE];
 
     strcpy(command, cmd_struct[id].c);
-    for(int i = 0; i < cmd_struct[id].num_params; i++) {
+    // Avoid using the "id of the program" parameter
+    for(int i = 1; i < cmd_struct[id].num_params; i++) {
         strcat(command, " ");
         strcat(command, cmd_struct[id].params[i]);
     }
